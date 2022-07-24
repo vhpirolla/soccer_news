@@ -4,26 +4,49 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.soccernews.data.remote.SoccerNewsApi;
 import com.example.soccernews.domain.News;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class NewsViewModel extends ViewModel {
 
-    private MutableLiveData<List<News>> news;
+    private MutableLiveData<List<News>> news = new MutableLiveData<>();
+    private final SoccerNewsApi api;
 
     public NewsViewModel() {
-        this.news = new MutableLiveData<>();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://digitalinnovationone.github.io/soccer-news-api/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        //TODO Remover Mock de Notícias
-        List<News> news = new ArrayList<>();
-        news.add(new News("Criciúma com desfalque importante", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sodales sapien non turpis gravida, pellentesque pulvinar justo aliquet. Maecenas eleifend ligula id nulla fermentum mollis."));
-        news.add(new News("Tigre joga Segunda contra o CSA", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sodales sapien non turpis gravida, pellentesque pulvinar justo aliquet. Maecenas eleifend ligula id nulla fermentum mollis."));
-        news.add(new News("Copa do Mundo Feminina está finalizando", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sodales sapien non turpis gravida, pellentesque pulvinar justo aliquet. Maecenas eleifend ligula id nulla fermentum mollis."));
+        api = retrofit.create(SoccerNewsApi.class);
+        this.findNews();
+    }
 
-        this.news.setValue(news);
+    private void findNews() {
+        api.getNews().enqueue(new Callback<List<News>>() {
+            @Override
+            public void onResponse(Call<List<News>> call, Response<List<News>> response) {
+                if(response.isSuccessful()){
+                    news.setValue(response.body());
+                } else {
+                    //TODO Pensar em uma estratégia de tratamento de erros
+                }
+            }
 
+            @Override
+            public void onFailure(Call<List<News>> call, Throwable t) {
+                    //TODO Pensar em uma estratégia de tratamento de erros
+            }
+        });
     }
 
     public LiveData<List<News>> getNews() {
