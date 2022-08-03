@@ -12,8 +12,6 @@ import androidx.room.Room;
 import com.example.soccernews.data.remote.local.AppDatabase;
 import com.example.soccernews.databinding.ActivityMainBinding;
 
-import com.example.soccernews.databinding.ActivityMainBinding;
-
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;

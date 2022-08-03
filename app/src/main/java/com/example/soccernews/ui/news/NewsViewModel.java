@@ -35,7 +35,7 @@ public class NewsViewModel extends ViewModel {
         this.findNews();
     }
 
-    private void findNews() {
+    public void findNews() {
         state.setValue(State.DOING);
         api.getNews().enqueue(new Callback<List<News>>() {
             @Override

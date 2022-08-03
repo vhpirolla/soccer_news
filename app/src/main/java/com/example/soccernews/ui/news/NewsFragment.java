@@ -17,6 +17,7 @@ import androidx.room.Room;
 import com.example.soccernews.MainActivity;
 import com.example.soccernews.databinding.FragmentNewsBinding;
 import com.example.soccernews.ui.adapter.NewsAdapter;
+import com.google.android.material.snackbar.Snackbar;
 
 public class NewsFragment extends Fragment {
 
@@ -30,6 +31,28 @@ public class NewsFragment extends Fragment {
         View root = binding.getRoot();
 
         binding.rvNews.setLayoutManager(new LinearLayoutManager(getContext()));
+        observeNews();
+
+        NewsViewModel.getState().observe(getViewLifecycleOwner(), state -> {
+                switch (state){
+                    case DOING:
+                        binding.srlNews.setRefreshing(true);
+                        break;
+                    case DONE:
+                        binding.srlNews.setRefreshing(false);
+                        break;
+                    case ERROR:
+                        binding.srlNews.setRefreshing(false);
+                        Snackbar.make(binding.srlNews,"Network Error", Snackbar.LENGTH_SHORT).show();
+                }
+            });
+
+            binding.srlNews.setOnRefreshListener(NewsViewModel::findNews);
+
+            return root;
+    }
+
+    private void observeNews() {
         NewsViewModel.getNews().observe(getViewLifecycleOwner(), news -> {
             binding.rvNews.setAdapter(new NewsAdapter(news, updatedNews -> {
                 MainActivity activity = (MainActivity) getActivity();
@@ -38,22 +61,6 @@ public class NewsFragment extends Fragment {
                 }
             }));
         });
-
-            NewsViewModel.getState().observe(getViewLifecycleOwner(), state -> {
-                switch (state){
-                    case DOING:
-                        // TODO Incluir SwipeRefreshLayout
-                        break;
-                    case DONE:
-                        // TODO Iniciar SwipeRefreshLayout
-                        break;
-                    case ERROR:
-                        // TODO Finalizar SwipeRefreshLayout
-                        // TODO Mostrar um erro
-                }
-            });
-
-            return root;
     }
 
     @Override
